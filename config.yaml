@@ -1,0 +1,57 @@
+app:
+  debug: false
+  log_level: DEBUG
+  http_server:
+    host: "0.0.0.0"
+    port: 2424
+
+database:
+  master:
+    driver: "postgresql+psycopg2"
+    host: "localhost"
+    port: 5432
+    username: postgres
+    password: postgres
+    echo: true
+    database: ai_agent_app
+    pool:
+      size: 20
+      max_overflow: 40
+      timeout: 30
+      recycle: 1800
+      pre_ping: true
+    ssl:
+      enabled: false
+      mode: verify-full
+      root_cert: null
+    retry:
+      max_attempts: 5
+      backoff_seconds: 2
+  slaves:
+  - driver: "postgresql+psycopg2"
+    host: "localhost"
+    port: 5432
+    username: postgres
+    password: postgres
+    echo: true
+    database: ai_agent_app
+    pool:
+      size: 20
+      max_overflow: 40
+      timeout: 30
+      recycle: 1800
+      pre_ping: true
+    ssl:
+      enabled: false
+      mode: verify-full
+      root_cert: null
+    retry:
+      max_attempts: 5
+      backoff_seconds: 2
+
+qdrant:
+  host: localhost
+  port: 6333
+
+huggingface:
+  token: 

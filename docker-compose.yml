@@ -1,0 +1,61 @@
+
+services:
+  ai_agent_db:
+    image: ankane/pgvector:latest
+    container_name: ai_agent_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_agent_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_agent_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ai_agent_qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai_agent_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  agent_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-app
+    restart: unless-stopped
+
+    ports:
+      - "2424:2424"
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: "/app/src"
+
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+
+    depends_on:
+      ai_agent_db:
+        condition: service_healthy
+      ai_agent_qdrant:
+        condition: service_healthy
+
+volumes:
+  pgvector-data:
+  qdrant-data:
